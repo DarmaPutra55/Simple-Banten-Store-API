@@ -1,0 +1,86 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model tabel_barang {
+  id                 Int                 @id @default(autoincrement())
+  nama               String              @db.VarChar(40)
+  deskripsi          String              @db.Text
+  id_kategori        Int                 @default(0)
+  harga              Int                 @default(0)
+  stok               Int                 @default(0)
+  terjual            Int                 @default(0)
+  diskon             Float?              @db.Float
+  gambar             String              @db.VarChar(250)
+  tabel_kategori     tabel_kategori      @relation(fields: [id_kategori], references: [id], onUpdate: Restrict, map: "FK_tabel_barang_tabel_kategori")
+  tabel_chart_barang tabel_cart_barang[]
+  tabel_ulasan       tabel_ulasan[]
+
+  @@index([id_kategori], map: "FK_tabel_barang_tabel_kategori")
+}
+
+model tabel_cart {
+  id                 Int                 @unique(map: "id") @default(autoincrement())
+  id_pengguna        Int                 @default(0)
+  tabel_pengguna     tabel_pengguna      @relation(fields: [id_pengguna], references: [id], onUpdate: Restrict, map: "FK_tabel_cart_tabel_pengguna")
+  tabel_chart_barang tabel_cart_barang[]
+
+  @@id([id, id_pengguna])
+  @@index([id_pengguna], map: "id_pengguna")
+}
+
+model tabel_cart_barang {
+  id           Int          @id @default(autoincrement())
+  id_chart     Int          @default(0)
+  id_barang    Int          @default(0)
+  jumlah       Int          @default(0)
+  tabel_barang tabel_barang @relation(fields: [id_barang], references: [id], onUpdate: Restrict, map: "FK_tabel_chart_barang_tabel_barang")
+  tabel_cart   tabel_cart   @relation(fields: [id_chart], references: [id], onUpdate: Restrict, map: "FK_tabel_chart_barang_tabel_cart")
+
+  @@index([id_barang], map: "FK_tabel_chart_barang_tabel_barang")
+  @@index([id_chart], map: "FK_tabel_chart_barang_tabel_cart")
+}
+
+model tabel_kategori {
+  id           Int            @id @default(autoincrement())
+  kategori     String         @default("0") @db.VarChar(40)
+  tabel_barang tabel_barang[]
+}
+
+model tabel_pengguna {
+  id           Int            @id @default(autoincrement())
+  username     String         @default("0") @db.VarChar(40)
+  password     String         @default("0") @db.VarChar(50)
+  id_role      Int            @default(0)
+  email        String         @default("0") @db.VarChar(40)
+  tabel_role   tabel_role     @relation(fields: [id_role], references: [id], onUpdate: Restrict, map: "FK_tabel_pengguna_tabel_role")
+  tabel_cart   tabel_cart[]
+  tabel_ulasan tabel_ulasan[]
+
+  @@index([id_role], map: "FK_tabel_pengguna_tabel_role")
+}
+
+model tabel_role {
+  id             Int              @id @default(autoincrement())
+  role           String           @default("0") @db.VarChar(15)
+  tabel_pengguna tabel_pengguna[]
+}
+
+model tabel_ulasan {
+  id             Int            @id @default(autoincrement())
+  id_barang      Int            @default(0)
+  ulasan         String         @db.Text
+  id_pengguna    Int            @default(0)
+  dibuat         DateTime       @db.DateTime(0)
+  diedit         DateTime?      @db.DateTime(0)
+  tabel_barang   tabel_barang   @relation(fields: [id_barang], references: [id], onUpdate: Restrict, map: "FK_tabel_ulasan_tabel_barang")
+  tabel_pengguna tabel_pengguna @relation(fields: [id_pengguna], references: [id], onUpdate: Restrict, map: "FK_tabel_ulasan_tabel_pengguna")
+
+  @@index([id_barang], map: "FK_tabel_ulasan_tabel_barang")
+  @@index([id_pengguna], map: "FK_tabel_ulasan_tabel_pengguna")
+}
