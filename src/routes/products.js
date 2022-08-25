@@ -2,31 +2,34 @@ const express = require('express');
 const {getAllProduct, getSingleProduct} = require('../logic/products/products')
 const router = express.Router();
 
-router.get('/', async (req, res)=>{
+router.get('/', async (req, res, next)=>{
     try{
-    const products = await getAllProduct();
-    if(!products) throw new Error();
-    res.status(200).send(products);
+        const products = await getAllProduct();
+        if(!products) {
+            let error = new Error("Barang tidak ditemukan.");
+            error.status = 400;
+            throw error;
+        }
+        res.status(200).send(products);
     }
-    catch(err){
-        return res.status(404).json({ 
-            ok: false,
-            error: "Barang tidak ditemukan" 
-        })
+    catch(error){
+        next(error)
     }
 })
 
-router.get('/:id', async(req, res)=>{
+router.get('/:id', async(req, res, next)=>{
     try{
-        const product = await getSingleProduct(parseInt(req.params.id));
-        if(!product) throw new Error();
+        const id = parseInt(req.params.id) ? parseInt(req.params.id) : null;
+        const product = id ? await getSingleProduct(id) : null;
+        if(!product) {
+            let error = new Error("Barang tidak ditemukan.");
+            error.status = 400;
+            throw error;
+        }
         res.status(200).send(product);
     }
-    catch(err){
-        return res.status(404).json({ 
-            ok: false,
-            error: "Barang tidak ditemukan" 
-        })
+    catch(error){
+        next(error)
     }
 });
 

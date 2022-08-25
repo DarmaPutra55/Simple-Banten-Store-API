@@ -1,26 +1,35 @@
 const express = require('express')
-const {makeToken, getUser} = require('../logic/auth/auth')
+const {makeToken, getUser, verifyToken} = require('../logic/auth/auth')
 const router = express.Router();
 
-router.get('/', async (req, res)=>{
+router.get('/', async (req, res, next)=>{
     try{
+        const cookie = req.cookies ? req.cookies.auth : null;
+        const decode = cookie ? verifyToken(cookie) : null;
+        if(decode) {
+            let error = new Error("Sudah login.");
+            error.status = 500;
+            throw error;
+        }
+
         const email = req.body.email;
         const username = req.body.username;
         const password = req.body.password;
         
         const user = await getUser(email, username, password);
-        if(!user) throw new Error();
+        if(!user) {
+            let error = new Error("Pengguna tidak ditemukan.");
+            error.status = 400;
+            throw error;
+        }
         const token = makeToken(user.id, user.username);
         res.cookie('auth', token);
         res.status(200).json({
             ok: true
-        })
+        });
     }
-    catch(err){
-        return res.status(404).json({ 
-            ok: false,
-            error: "Gagal login" 
-        })
+    catch(error){
+        next(error);
     }
 })
 

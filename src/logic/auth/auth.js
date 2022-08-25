@@ -16,16 +16,34 @@ async function getUser(inputEmail, inputUsername, inputPassword) {
                 ],
 
             password: inputPassword
+        },
+        select: {
+            id: true,
+            username: true,
         }
     });
 
     return user;
 }
 
+async function register(inputEmail, inputUsername, inputPassword){
+    const user = await prisma.tabel_pengguna.create({
+        data:{
+            username: inputUsername,
+            password: inputPassword,
+            email: inputEmail,
+            id_role: 2
+        }
+    });
+    
+
+    return user;
+}
+
 function makeToken(id, username) {
     return jwt.sign({
-        userId: id,
-        userName: username,
+        "id": id,
+        "username": username,
     }, 'plasma', {
         expiresIn: '1h'
     });
@@ -35,4 +53,4 @@ function verifyToken(token) {
     return jwt.verify(token, 'plasma')
 }
 
-module.exports = { getUser, makeToken, verifyToken }
+module.exports = { getUser, register, makeToken, verifyToken }
