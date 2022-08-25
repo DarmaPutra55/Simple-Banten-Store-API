@@ -4,7 +4,8 @@
   "description": "",
   "main": "src/app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon server.js"
   },
   "author": "",
   "license": "ISC",
@@ -18,5 +19,8 @@
     "helmet": "^5.1.1",
     "morgan": "^1.10.0",
     "prisma": "^4.2.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.19"
   }
 }
