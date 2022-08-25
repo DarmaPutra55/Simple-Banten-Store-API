@@ -9,7 +9,10 @@ router.get('/', async (req, res)=>{
     res.status(200).send(products);
     }
     catch(err){
-        res.status(404).send("Items not found");
+        return res.status(404).json({ 
+            ok: false,
+            error: "Barang tidak ditemukan" 
+        })
     }
 })
 
@@ -20,7 +23,10 @@ router.get('/:id', async(req, res)=>{
         res.status(200).send(product);
     }
     catch(err){
-        res.status(404).send("Item not found");
+        return res.status(404).json({ 
+            ok: false,
+            error: "Barang tidak ditemukan" 
+        })
     }
 });
 
