@@ -33,4 +33,11 @@ router.get('/', async (req, res, next)=>{
     }
 })
 
+router.delete('/', (req, res)=>{
+    res.clearCookie("auth");
+    res.status(200).json({
+        ok: true
+    });
+})
+
 module.exports = router;

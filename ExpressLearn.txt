@@ -1,2 +1,3 @@
 +Ignore suggested change that ask to turn 'require' into ES expression.
 +When finding table record with 'WHERE' more than one, use findFirst for single record and findMany for many record instead of findUnique
++When creating new record in table, make sure the foreign key match with the one in database.

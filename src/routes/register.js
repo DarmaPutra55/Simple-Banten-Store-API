@@ -2,7 +2,7 @@ const express = require('express')
 const {makeToken, getUser, register} = require('../logic/auth/auth')
 const router = express.Router();
 
-router.get('/', async (req, res, next)=>{
+router.post('/', async (req, res, next)=>{
     try{
         const email = req.body.email;
         const username = req.body.username;
