@@ -8,7 +8,9 @@ const cookieParser = require('cookie-parser')
 const app = express();
 const products = require('./routes/products');
 const login = require('./routes/login');
+const logout = require('./routes/logout');
 const register = require('./routes/register');
+const cart = require('./routes/cart');
 
 app.use(helmet());
 app.use(bodyParser.json());
@@ -18,7 +20,9 @@ app.use(cookieParser())
 
 app.use('/products', products);
 app.use('/login', login);
+app.use('/logout', logout);
 app.use('/register', register);
+app.use('/cart', cart);
 
 app.get('*',  (req, res)=>{
     res.status(404).send('Route not found');

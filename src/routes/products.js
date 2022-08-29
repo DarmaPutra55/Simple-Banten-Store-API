@@ -17,10 +17,10 @@ router.get('/', async (req, res, next)=>{
     }
 })
 
-router.get('/:id', async(req, res, next)=>{
+router.get('/:itemId', async(req, res, next)=>{
     try{
-        const id = parseInt(req.params.id) ? parseInt(req.params.id) : null;
-        const product = id ? await getSingleProduct(id) : null;
+        const itemId = parseInt(req.params.itemId) ? parseInt(req.params.itemId) : null;
+        const product = itemId ? await getSingleProduct(itemId) : null;
         if(!product) {
             let error = new Error("Barang tidak ditemukan.");
             error.status = 400;

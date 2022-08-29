@@ -8,42 +8,29 @@ datasource db {
 }
 
 model tabel_barang {
-  id                 Int                 @id @default(autoincrement())
-  nama               String              @db.VarChar(40)
-  deskripsi          String              @db.Text
-  id_kategori        Int                 @default(0)
-  harga              Int                 @default(0)
-  stok               Int                 @default(0)
-  terjual            Int                 @default(0)
-  diskon             Float?              @db.Float
-  gambar             String              @db.VarChar(250)
-  tabel_kategori     tabel_kategori      @relation(fields: [id_kategori], references: [id], onUpdate: Restrict, map: "FK_tabel_barang_tabel_kategori")
-  tabel_chart_barang tabel_cart_barang[]
-  tabel_ulasan       tabel_ulasan[]
+  id                Int                 @id @default(autoincrement())
+  nama              String              @db.VarChar(40)
+  deskripsi         String              @db.Text
+  id_kategori       Int                 @default(0)
+  harga             Int                 @default(0)
+  stok              Int                 @default(0)
+  terjual           Int                 @default(0)
+  diskon            Float?              @db.Float
+  gambar            String              @db.VarChar(250)
+  tabel_kategori    tabel_kategori      @relation(fields: [id_kategori], references: [id], onUpdate: Restrict, map: "FK_tabel_barang_tabel_kategori")
+  tabel_ulasan      tabel_ulasan[]
+  table_cart_barang table_cart_barang[]
 
   @@index([id_kategori], map: "FK_tabel_barang_tabel_kategori")
 }
 
 model tabel_cart {
-  id                 Int                 @unique(map: "id") @default(autoincrement())
-  id_pengguna        Int                 @default(0)
-  tabel_pengguna     tabel_pengguna      @relation(fields: [id_pengguna], references: [id], onUpdate: Restrict, map: "FK_tabel_cart_tabel_pengguna")
-  tabel_chart_barang tabel_cart_barang[]
+  id                Int                 @id @default(autoincrement())
+  id_pengguna       Int                 @default(0)
+  tabel_pengguna    tabel_pengguna      @relation(fields: [id_pengguna], references: [id], onUpdate: Restrict, map: "FK_tabel_cart_tabel_pengguna")
+  table_cart_barang table_cart_barang[]
 
-  @@id([id, id_pengguna])
-  @@index([id_pengguna], map: "id_pengguna")
-}
-
-model tabel_cart_barang {
-  id           Int          @id @default(autoincrement())
-  id_chart     Int          @default(0)
-  id_barang    Int          @default(0)
-  jumlah       Int          @default(0)
-  tabel_barang tabel_barang @relation(fields: [id_barang], references: [id], onUpdate: Restrict, map: "FK_tabel_chart_barang_tabel_barang")
-  tabel_cart   tabel_cart   @relation(fields: [id_chart], references: [id], onUpdate: Restrict, map: "FK_tabel_chart_barang_tabel_cart")
-
-  @@index([id_barang], map: "FK_tabel_chart_barang_tabel_barang")
-  @@index([id_chart], map: "FK_tabel_chart_barang_tabel_cart")
+  @@index([id_pengguna], map: "FK_tabel_cart_tabel_pengguna")
 }
 
 model tabel_kategori {
@@ -83,4 +70,17 @@ model tabel_ulasan {
 
   @@index([id_barang], map: "FK_tabel_ulasan_tabel_barang")
   @@index([id_pengguna], map: "FK_tabel_ulasan_tabel_pengguna")
+}
+
+model table_cart_barang {
+  id           Int          @id @default(autoincrement())
+  id_cart      Int          @default(0)
+  id_barang    Int          @default(0)
+  jumlah       Int          @default(0)
+  tabel_barang tabel_barang @relation(fields: [id_barang], references: [id], onUpdate: Restrict, map: "FK_table_cart_barang_tabel_barang")
+  tabel_cart   tabel_cart   @relation(fields: [id_cart], references: [id], onUpdate: Restrict, map: "FK_table_cart_barang_tabel_cart")
+
+  @@unique([id_cart, id_barang], map: "id_cart_id_barang")
+  @@index([id_barang], map: "FK_table_cart_barang_tabel_barang")
+  @@index([id_cart], map: "FK_table_cart_barang_tabel_cart")
 }

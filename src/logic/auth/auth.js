@@ -40,6 +40,16 @@ async function register(inputEmail, inputUsername, inputPassword){
     return user;
 }
 
+async function cekUser(userID) {
+    const user = await prisma.tabel_pengguna.findUnique({
+        where:{
+            id: userID
+        }
+    })
+
+    return user ? true : false
+}
+
 function makeToken(id, username) {
     return jwt.sign({
         "id": id,
@@ -53,4 +63,4 @@ function verifyToken(token) {
     return jwt.verify(token, 'plasma')
 }
 
-module.exports = { getUser, register, makeToken, verifyToken }
+module.exports = { getUser, register, cekUser, makeToken, verifyToken }
