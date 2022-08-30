@@ -22,25 +22,19 @@ router.get('/:productId', async(req, res, next)=>{
     try{
         const productId = parseInt(req.params.productId) ? parseInt(req.params.productId) : null;
         const product = await getSingleProduct(productId);
+        
+        if(!product){
+            let error = new Error("Barang tidak ditemukan!");
+            error.status = 400;
+            throw error;
+        }
+
         res.status(200).send(product);
     }
     catch(error){
         let prismaError;
         
-        if(error instanceof Prisma.PrismaClientKnownRequestError){
-            switch(error.code){
-                case('P2002'):
-                    prismaError = new Error("Product tidak ditemukan!");
-                    prismaError.status = 400;
-                    break;
-                
-                default:
-                    prismaError = new Error(error.code);
-                    prismaError.status = 400;
-            }
-        }
-
-        else if(error instanceof Prisma.PrismaClientValidationError){
+        if(error instanceof Prisma.PrismaClientValidationError){
             prismaError = new Error("Tipe untuk parameter salah!");
             prismaError.status = 400;
         }

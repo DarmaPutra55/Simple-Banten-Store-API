@@ -10,14 +10,20 @@ router.get('/:cartId', async (req, res, next)=>{
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
+        const cart = await getSingleCart(cartId);
 
-        if(!(await cekUserCart(cartId, jwtValue.id))){
+        if(!cart){
+            let error = new Error("Cart tidak ditemukan!");
+            error.status = 400;
+            throw error;
+        }
+
+        if(!(await cekUserCart(cart.id, jwtValue.id))){
             let error = new Error("Cart bukan milik pengguna!");
             error.status = 400;
             throw error;
         }
 
-        const cart = await getSingleCart(cartId);
         res.status(200).send(cart);
     }
     catch(error){
