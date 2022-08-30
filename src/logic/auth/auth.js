@@ -41,13 +41,24 @@ async function register(inputEmail, inputUsername, inputPassword){
 }
 
 async function cekUser(userID) {
-    const user = await prisma.tabel_pengguna.findUnique({
+    const user = await prisma.tabel_pengguna.find({
         where:{
             id: userID
         }
     })
 
     return user ? true : false
+}
+
+async function cekLogin(cookie){
+        const decode = cookie ? jwt.verify(cookie, 'plasma') : null;
+        if(!decode){
+            let error = new Error("Login terlebih dahulu!");
+            error.status = 400;
+            throw error;
+        }
+
+        return decode;
 }
 
 function makeToken(id, username) {
@@ -59,8 +70,4 @@ function makeToken(id, username) {
     });
 }
 
-function verifyToken(token) {
-    return jwt.verify(token, 'plasma')
-}
-
-module.exports = { getUser, register, cekUser, makeToken, verifyToken }
+module.exports = { getUser, register, cekUser, cekLogin, makeToken }

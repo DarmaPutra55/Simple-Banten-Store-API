@@ -1,116 +1,127 @@
+const { Prisma } = require('@prisma/client');
 const express = require('express')
-const { cekUser, verifyToken } = require('../logic/auth/auth')
-const { putProduct, removeProduct, cekCartBarang, getSingleCart, makeCart } = require('../logic/cart/cart')
-const { getSingleProduct } = require('../logic/products/products')
+const { cekLogin } = require('../logic/auth/auth')
+const { putProduct, removeProduct, cekUserCart, getSingleCart, makeCart } = require('../logic/cart/cart')
+const { cekProduct } = require('../logic/products/products')
 const router = express.Router();
 
-async function userTest(req) {
-    const cookie = req.cookies ? req.cookies.auth : null;
-    const decode = cookie ? verifyToken(cookie) : null;
-
-    if (!decode) {
-        let error = new Error("Login terlebih dahulu.");
-        error.status = 500;
-        throw error;
-    }
-
-    const userId = parseInt(req.params.userId) ? parseInt(req.params.userId) : null;
-
-    if (!(await cekUser(decode.id))) {
-        let error = new Error("Pengguna tidak ditemukan.");
-        error.status = 500;
-        throw error;
-    }
-
-    if (userId !== decode.id) {
-        let error = new Error("Beda pengguna.");
-        error.status = 500;
-        throw error;
-    }
-
-    return userId;
-}
-
-async function itemTest(req){
-    const productId = req.body.productId;
-
-    const product = await getSingleProduct(productId);
-    
-    if(!product){
-        let error = new Error("Barang tidak ditemukan.");
-        error.status = 500;
-        throw error;
-    }
-
-    const itemQuantity = req.body.itemQuantity;
-
-    if(itemQuantity > product.stok){
-        let error = new Error("Permintaan melibihi stok.");
-        error.status = 500;
-        throw error;
-    }
-
-    return {productId, itemQuantity}
-}
-
-router.get('/:userId', async (req, res, next)=>{
+router.get('/:cartId', async (req, res, next)=>{
     try{
-        const userId = await userTest(req, res);
-        const cart = await getSingleCart(userId) || await makeCart(userId);
+        const cookie = req.cookies ? req.cookies.auth : null;
+        const jwtValue = await cekLogin(cookie);
+        const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
+
+        if(!(await cekUserCart(cartId, jwtValue.id))){
+            let error = new Error("Cart bukan milik pengguna!");
+            error.status = 400;
+            throw error;
+        }
+
+        const cart = await getSingleCart(cartId);
         res.status(200).send(cart);
     }
-    catch(err){
-        next(err);
+    catch(error){
+        let prismaError;
+        
+        if(error instanceof Prisma.PrismaClientValidationError){
+            prismaError = new Error("Tipe untuk parameter salah!");
+            prismaError.status = 400;
+        }
+
+        next(prismaError || error);
     }
 })
 
-router.post('/:userId', async (req, res, next) => {
+router.post('/:cartId', async (req, res, next) => {
     try {
-        const userId = await userTest(req);
+        const cookie = req.cookies ? req.cookies.auth : null;
+        const jwtValue = await cekLogin(cookie);
+        const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        const cart = await getSingleCart(userId) || await makeCart(userId);
-
-        const {productId, itemQuantity} = await itemTest(req);
-
-        if(await cekCartBarang(cart.id, productId)){
-            let error = new Error("Barang sudah ada.");
-            error.status = 500;
+        if(!(await cekUserCart(cartId, jwtValue.id))){
+            let error = new Error("Cart bukan milik pengguna!");
+            error.status = 400;
             throw error;
         }
 
-        const cartItem = await putProduct(cart.id, productId, itemQuantity);
+        const cart = await getSingleCart(cartId);
+        const productId = req.body.productId;
+        const productQuantity = req.body.productQuantity;
+        await cekProduct(productId, productQuantity);
+        const cartItem = await putProduct(cart.id, productId, productQuantity);
 
         res.status(200).json({
             ok: true
         });
     }
 
-    catch (err) {
-        next(err);
+    catch (error) {
+        let prismaError;
+        
+        if(error instanceof Prisma.PrismaClientKnownRequestError){
+            switch(error.code){
+                case('P2002'):
+                    prismaError = new Error("Product sudah ada di cart!");
+                    prismaError.status = 400;
+                    break;
+                
+                default:
+                    prismaError = new Error(error.code);
+                    prismaError.status = 400;
+            }
+        }
+
+        else if(error instanceof Prisma.PrismaClientValidationError){
+            prismaError = new Error("Tipe untuk parameter salah!");
+            prismaError.status = 400;
+        }
+
+        next(prismaError || error);
     }
 })
 
-router.delete('/:userId/:productId', async (req, res, next) => {
+router.delete('/:cartId/:cartItemId', async (req, res, next) => {
     try {
-        const userId = await userTest(req);
-        const cart = await getSingleCart(userId) || await makeCart(userId);
-        const productId = parseInt(req.params.productId) ? parseInt(req.params.productId) : null;
+        const cookie = req.cookies ? req.cookies.auth : null;
+        const jwtValue = await cekLogin(cookie);
+        const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        if(!productId || !(await cekCartBarang(cart.id, productId))){
-            let error = new Error("Barang tidak ditemukan.");
-            error.status = 500;
+        if(!(await cekUserCart(cartId, jwtValue.id))){
+            let error = new Error("Cart bukan milik pengguna!");
+            error.status = 400;
             throw error;
         }
 
-        const cartItem = await removeProduct(productId);
+        const cartItemId = parseInt(req.params.cartItemId) ? parseInt(req.params.cartItemId) : null;
+        const cartItem = await removeProduct(cartItemId);
 
         res.status(200).json({
             ok: true
         });
     }
 
-    catch (err) {
-        next(err);
+    catch (error) {
+        let prismaError;
+        
+        if(error instanceof Prisma.PrismaClientKnownRequestError){
+            switch(error.code){
+                case('P2025'):
+                    prismaError = new Error("Product tidak ada di cart!");
+                    prismaError.status = 400;
+                    break;
+                
+                default:
+                    prismaError = new Error(error.code);
+                    prismaError.status = 400;
+            }
+        }
+
+        else if(error instanceof Prisma.PrismaClientValidationError){
+            prismaError = new Error("Tipe untuk parameter salah!");
+            prismaError.status = 400;
+        }
+
+        next(prismaError || error);
     }
 })
 

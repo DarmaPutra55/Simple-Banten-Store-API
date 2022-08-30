@@ -14,20 +14,20 @@ async function putProduct(cartId, productId, itemQuantitiy) {
 
 }
 
-async function removeProduct(productId) {
-    const cartItem = await prisma.table_cart_barang.deleteMany({
+async function removeProduct(cartItemId) {
+    const cartItem = await prisma.table_cart_barang.delete({
         where: {
-            id_barang: productId
+            id: cartItemId
         }
     })
 
     return cartItem;
 }
 
-async function getSingleCart(userId) {
-    const cart = await prisma.tabel_cart.findFirst({
+async function getSingleCart(cartId) {
+    const cart = await prisma.tabel_cart.findUnique({
         where: {
-            id_pengguna: userId
+            id: cartId
         },
         include: {
             table_cart_barang: {
@@ -62,17 +62,18 @@ async function makeCart(userId) {
     return cart;
 }
 
-async function cekCartBarang(cartId, productId){
-    const cartItem = await prisma.table_cart_barang.findFirst({
+async function cekUserCart(cartId, userId){
+    const cart = await prisma.tabel_cart.findFirst({
         where: {
             AND: [
-                { id_cart: cartId },
-                { id_barang: productId }
-            ]
+                    {id: cartId},
+                    {id_pengguna: userId}
+                ]
+            
         }
     })
 
-    return cartItem ? true : false;
+    return cart
 }
 
 async function getAllCart() {
@@ -83,4 +84,4 @@ async function clearCart() {
 
 }
 
-module.exports = { putProduct, removeProduct, makeCart, cekCartBarang, getSingleCart, getAllCart, clearCart }
+module.exports = { putProduct, removeProduct, makeCart, cekUserCart, getSingleCart, getAllCart, clearCart }

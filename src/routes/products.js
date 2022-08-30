@@ -1,3 +1,4 @@
+const { Prisma } = require('@prisma/client');
 const express = require('express');
 const {getAllProduct, getSingleProduct} = require('../logic/products/products')
 const router = express.Router();
@@ -5,8 +6,8 @@ const router = express.Router();
 router.get('/', async (req, res, next)=>{
     try{
         const products = await getAllProduct();
-        if(!products) {
-            let error = new Error("Barang tidak ditemukan.");
+        if(products.length === 0) {
+            let error = new Error("Tidak ada barang untuk dijual.");
             error.status = 400;
             throw error;
         }
@@ -17,19 +18,34 @@ router.get('/', async (req, res, next)=>{
     }
 })
 
-router.get('/:itemId', async(req, res, next)=>{
+router.get('/:productId', async(req, res, next)=>{
     try{
-        const itemId = parseInt(req.params.itemId) ? parseInt(req.params.itemId) : null;
-        const product = itemId ? await getSingleProduct(itemId) : null;
-        if(!product) {
-            let error = new Error("Barang tidak ditemukan.");
-            error.status = 400;
-            throw error;
-        }
+        const productId = parseInt(req.params.productId) ? parseInt(req.params.productId) : null;
+        const product = await getSingleProduct(productId);
         res.status(200).send(product);
     }
     catch(error){
-        next(error)
+        let prismaError;
+        
+        if(error instanceof Prisma.PrismaClientKnownRequestError){
+            switch(error.code){
+                case('P2002'):
+                    prismaError = new Error("Product tidak ditemukan!");
+                    prismaError.status = 400;
+                    break;
+                
+                default:
+                    prismaError = new Error(error.code);
+                    prismaError.status = 400;
+            }
+        }
+
+        else if(error instanceof Prisma.PrismaClientValidationError){
+            prismaError = new Error("Tipe untuk parameter salah!");
+            prismaError.status = 400;
+        }
+
+        next(prismaError || error);
     }
 });
 

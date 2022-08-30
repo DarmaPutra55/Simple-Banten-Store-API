@@ -16,4 +16,13 @@ async function getSingleProduct(productID){
     return product;
 }
 
-module.exports = {getAllProduct, getSingleProduct}
+async function cekItem(productId, productQuantity){
+  const product = await getSingleProduct(productId);
+  if(productQuantity > product.stok){
+      let error = new Error("Permintaan melibihi stok.");
+      error.status = 400;
+      throw error;
+  }
+}
+
+module.exports = {getAllProduct, getSingleProduct, cekItem}
