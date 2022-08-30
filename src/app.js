@@ -22,10 +22,13 @@ app.use('/products', products);
 app.use('/login', login);
 app.use('/logout', logout);
 app.use('/register', register);
-app.use('/cart', cart);
+app.use('/carts', cart);
 
 app.get('*',  (req, res)=>{
-    res.status(404).send('Route not found');
+    res.status(404).json({
+        ok: false,
+        error: "Route is not found."
+    });
 });
 
 app.use((error, req, res, next)=>{

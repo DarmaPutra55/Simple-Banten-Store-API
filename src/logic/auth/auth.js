@@ -57,7 +57,6 @@ async function cekLogin(cookie){
             error.status = 400;
             throw error;
         }
-
         return decode;
 }
 
@@ -66,7 +65,7 @@ function makeToken(id, username) {
         "id": id,
         "username": username,
     }, 'plasma', {
-        expiresIn: '1h'
+        expiresIn: '7d'
     });
 }
 

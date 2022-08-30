@@ -73,15 +73,32 @@ async function cekUserCart(cartId, userId){
         }
     })
 
-    return cart
+    return cart;
 }
 
 async function getAllCart() {
-
+    const carts = await prisma.tabel_cart.findMany();
+    return carts;
 }
 
-async function clearCart() {
+async function clearCart(cartId) {
+    const cartItem = await prisma.table_cart_barang.deleteMany({
+        where: {
+            id_cart: cartId
+        }
+    })
 
+    return cartItem;
 }
 
-module.exports = { putProduct, removeProduct, makeCart, cekUserCart, getSingleCart, getAllCart, clearCart }
+async function deleteCart(cartId){
+    const cart = await prisma.tabel_barang.delete({
+        where: {
+            id: cartId
+        }
+    })
+
+    return cart;
+}
+
+module.exports = { putProduct, removeProduct, makeCart, cekUserCart, getSingleCart, getAllCart, clearCart, deleteCart }
