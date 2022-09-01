@@ -1,28 +1,43 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-async function getAllProduct(){
+class Products{
+  constructor(products){
+    this.sets(products);
+  }
+
+  sets(products){
+    this.products =  products;
+  }
+  
+  gets(){
+    return this.products;
+  }
+
+  async deletes(){
+
+  }
+
+  static async init(){
     const products = await prisma.tabel_barang.findMany();
     return products;
+  }
+
+  static async creates(){
+
+  }
+
 }
 
-async function getSingleProduct(productID){
-    const product = await prisma.tabel_barang.findUnique({
-        where: {
-          id: productID,
-        },
-      });
-    
-    return product;
-}
 
-async function cekProduct(productId, productQuantity){
+
+/*async function cekProduct(productId, productQuantity){
   const product = await getSingleProduct(productId);
   if(productQuantity > product.stok){
       let error = new Error("Permintaan melibihi stok.");
       error.status = 400;
       throw error;
   }
-}
+}*/
 
-module.exports = {getAllProduct, getSingleProduct, cekProduct}
+module.exports = { Products }

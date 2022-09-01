@@ -1,15 +1,15 @@
 const { Prisma } = require('@prisma/client');
 const express = require('express')
 const { cekLogin } = require('../logic/auth/auth')
-const { putProduct, removeProduct, cekUserCart, getSingleCart, deleteCart, clearCart, getAllCart } = require('../logic/cart/cart')
-const { cekProduct } = require('../logic/products/products')
+const { Cart } = require('../logic/cart/cart')
+const { Carts } = require('../logic/cart/carts')
 const router = express.Router();
 
 router.get('/', async (req, res, next)=>{
     try{
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = await cekLogin(cookie);
-        const carts = await getAllCart(cartId);
+        const carts = new Carts(await Carts.init()).gets();
 
         if(carts.length === 0){
             let error = new Error("Tidak ada cart!");
@@ -30,11 +30,13 @@ router.get('/:cartId', async (req, res, next)=>{
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        if(!(await cekUserCart(cartId, jwtValue.id))){
+        /*if(!(await cekUserCart(cartId, jwtValue.id))){
             let error = new Error("Terjadi kesalahan saat mengambil cart!");
             error.status = 400;
             throw error;
-        }
+        }*/
+
+        const cart = new Cart(await Cart.init(cartId)).get();
 
         res.status(200).send(cart);
     }
@@ -56,17 +58,17 @@ router.post('/:cartId', async (req, res, next) => {
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        if(!(await cekUserCart(cartId, jwtValue.id))){
+        /*if(!(await cekUserCart(cartId, jwtValue.id))){
             let error = new Error("Terjadi kesalahan saat mengambil cart!");
             error.status = 400;
             throw error;
-        }
+        }*/
 
-        const cart = await getSingleCart(cartId);
+        const cart = new Cart(await Cart.init(cartId));
         const productId = req.body.productId;
         const productQuantity = req.body.productQuantity;
-        await cekProduct(productId, productQuantity);
-        const cartItem = await putProduct(cart.id, productId, productQuantity);
+        //await cekProduct(productId, productQuantity);
+        await cart.putProduct(productId, productQuantity);
 
         res.status(200).json({
             ok: true
@@ -104,14 +106,15 @@ router.delete('/:cartId/:cartItemId', async (req, res, next) => {
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        if(!(await cekUserCart(cartId, jwtValue.id))){
+        /*if(!(await cekUserCart(cartId, jwtValue.id))){
             let error = new Error("Terjadi kesalahan saat mengambil cart!");
             error.status = 400;
             throw error;
-        }
+        }*/
 
+        const cart = new Cart(await Cart.init(cartId));
         const cartItemId = parseInt(req.params.cartItemId) ? parseInt(req.params.cartItemId) : null;
-        const cartItem = await removeProduct(cartItemId);
+        await cart.removeProduct(cartItemId);
 
         res.status(200).json({
             ok: true
@@ -149,13 +152,15 @@ router.post('/:cartId/clear', async(req, res, next)=>{
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
 
-        if(!(await cekUserCart(cartId, jwtValue.id))){
+        /*if(!(await cekUserCart(cartId, jwtValue.id))){
             let error = new Error("Terjadi kesalahan saat mengambil cart!");
             error.status = 400;
             throw error;
-        }
+        }*/
 
-        const cartItem = await clearCart(cartId);
+        const cart = new Cart(await Cart.init(cartId));
+        await cart.clearCart();
+
         res.status(200).json({
             ok: true
         });

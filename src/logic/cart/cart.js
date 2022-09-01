@@ -1,68 +1,86 @@
 const { PrismaClient } = require('@prisma/client');
+const { CartItem } = require('../cartItem/cartItem');
+const { CartItems } = require('../cartItem/cartItems');
 const prisma = new PrismaClient()
 
-async function putProduct(cartId, productId, itemQuantitiy) {
-    const cartItem = prisma.table_cart_barang.create({
-        data: {
-            id_cart: cartId,
-            id_barang: productId,
-            jumlah: itemQuantitiy
-        }
-    })
-                
-    return cartItem;
+class Cart{
+    constructor(cart){
+        this.set(cart);
+    }
 
-}
+    set(cart){
+        this.cart = cart;
+    }
 
-async function removeProduct(cartItemId) {
-    const cartItem = await prisma.table_cart_barang.delete({
-        where: {
-            id: cartItemId
-        }
-    })
+    get(){
+        return this.cart;
+    }
 
-    return cartItem;
-}
+    async delete(){
+        const cart = await prisma.tabel_barang.delete({
+            where: {
+                id: this.cart.id
+            }
+        })
+    
+        this.cart = {};
+    }
 
-async function getSingleCart(cartId) {
-    const cart = await prisma.tabel_cart.findUnique({
-        where: {
-            id: cartId
-        },
-        include: {
-            table_cart_barang: {
-                select: {
-                    id: true,
-                    id_barang: true,
-                    jumlah: true
-                }
+    async putProduct(productId, itemQuantitiy){
+        const cartItem = CartItem.create(this.cart.id, productId, itemQuantitiy);
+    }
+
+    async removeProduct(cartItemId){
+        const cartItem = new CartItem(await CartItem.init(cartItemId));
+        await cartItem.delete();
+    }
+
+    async clearCart(){
+        const cartItems = CartItems.clear();
+    }
+
+    static async init(cartId){
+        const cart = await prisma.tabel_cart.findUnique({
+            where: {
+                id: cartId
             },
-        }
-    })
+            include: {
+                table_cart_barang: {
+                    select: {
+                        id: true,
+                        id_barang: true,
+                        jumlah: true
+                    }
+                },
+            }
+        })
+    
+        return cart;
+    }
 
-    return cart;
-}
-
-async function makeCart(userId) {
-    const cart =  await prisma.tabel_cart.create({
-        data: {
-            id_pengguna: userId
-        },
-        include: {
-            table_cart_barang: {
-                select: {
-                    id: true,
-                    id_barang: true,
-                    jumlah: true
-                }
+    static async create(userId){
+        const cart =  await prisma.tabel_cart.create({
+            data: {
+                id_pengguna: userId
             },
-        }
-    })
+            include: {
+                table_cart_barang: {
+                    select: {
+                        id: true,
+                        id_barang: true,
+                        jumlah: true
+                    }
+                },
+            }
+        })
 
-    return cart;
+        return cart;
+    }
+
+
 }
 
-async function cekUserCart(cartId, userId){
+/*async function cekUserCart(cartId, userId){
     const cart = await prisma.tabel_cart.findFirst({
         where: {
             AND: [
@@ -74,31 +92,6 @@ async function cekUserCart(cartId, userId){
     })
 
     return cart;
-}
+}*/
 
-async function getAllCart() {
-    const carts = await prisma.tabel_cart.findMany();
-    return carts;
-}
-
-async function clearCart(cartId) {
-    const cartItem = await prisma.table_cart_barang.deleteMany({
-        where: {
-            id_cart: cartId
-        }
-    })
-
-    return cartItem;
-}
-
-async function deleteCart(cartId){
-    const cart = await prisma.tabel_barang.delete({
-        where: {
-            id: cartId
-        }
-    })
-
-    return cart;
-}
-
-module.exports = { putProduct, removeProduct, makeCart, cekUserCart, getSingleCart, getAllCart, clearCart, deleteCart }
+module.exports = { Cart }
