@@ -25,14 +25,8 @@ router.get('/:productId', async (req, res, next) => {
     }
 
     catch (error) {
-        let prismaError;
-
-        if (error instanceof Prisma.PrismaClientValidationError) {
-            prismaError = new Error("Tipe untuk parameter salah!");
-            prismaError.status = 400;
-        }
-
-        next(prismaError || error);
+        if (error instanceof Prisma.PrismaClientValidationError) error = new Error("Tipe untuk parameter salah!");
+        next(error);
     }
 });
 
