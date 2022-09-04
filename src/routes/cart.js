@@ -3,6 +3,7 @@ const express = require('express')
 const { cekLogin } = require('../logic/auth/auth')
 const { Cart } = require('../logic/cart/cart')
 const { Carts } = require('../logic/cart/carts')
+const { Product } = require('../logic/product/product')
 const router = express.Router();
 
 router.get('/', async (req, res, next)=>{
@@ -29,14 +30,15 @@ router.get('/:cartId', async (req, res, next)=>{
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
+        const cart = new Cart(await Cart.init(cartId));
+        if (!cart.get()) throw  new Error('Cart tidak ditemukan!');
+        if (jwtValue.id !== cart.get().id_pengguna) throw new Error('Pengguna bukan pemilik cart!');
 
         /*if(!(await cekUserCart(cartId, jwtValue.id))){
             let error = new Error("Terjadi kesalahan saat mengambil cart!");
             error.status = 400;
             throw error;
         }*/
-
-        const cart = new Cart(await Cart.init(cartId)).get();
 
         res.status(200).send(cart);
     }
@@ -57,19 +59,15 @@ router.post('/:cartId', async (req, res, next) => {
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = await cekLogin(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
-
-        /*if(!(await cekUserCart(cartId, jwtValue.id))){
-            let error = new Error("Terjadi kesalahan saat mengambil cart!");
-            error.status = 400;
-            throw error;
-        }*/
-
         const cart = new Cart(await Cart.init(cartId));
+        if(!cart.get()) throw new Error('Cart tidak ditemukan!');
+        if (jwtValue.id !== cart.get().id_pengguna) throw new Error('Pengguna bukan pemilik cart!');
+
         const productId = req.body.productId;
         const productQuantity = req.body.productQuantity;
-        //await cekProduct(productId, productQuantity);
-        await cart.putProduct(productId, productQuantity);
-
+        const product = new Product(await Product.init(productId));
+        if(productQuantity > product.get().stok) throw new Error('Permintaan melebihi stok!')
+        const cartItem = await cart.putProduct(productId, productQuantity);
         res.status(200).json({
             ok: true
         });

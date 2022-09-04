@@ -27,7 +27,7 @@ class Cart{
     }
 
     async putProduct(productId, itemQuantitiy){
-        const cartItem = CartItem.create(this.cart.id, productId, itemQuantitiy);
+        const cartItem = await CartItem.create(this.cart.id, productId, itemQuantitiy);
     }
 
     async removeProduct(cartItemId){
@@ -36,7 +36,7 @@ class Cart{
     }
 
     async clearCart(){
-        const cartItems = CartItems.clear();
+        const cartItems = CartItems.deletes(this.cart.id);
     }
 
     static async init(cartId){

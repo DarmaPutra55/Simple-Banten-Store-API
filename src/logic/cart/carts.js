@@ -14,8 +14,8 @@ class Carts{
         return this.carts;
     }
 
-    static async init(){
-        const carts = await prisma.tabel_cart.findMany();
+    static async init(option = {}){
+        const carts = await prisma.tabel_cart.findMany(option);
         return carts;
     }
 }
