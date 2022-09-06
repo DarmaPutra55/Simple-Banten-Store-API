@@ -14,6 +14,7 @@ const cart = require('./routes/cart');
 
 app.use(helmet());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(cors());
 app.use(morgan('combined'));
 app.use(cookieParser())

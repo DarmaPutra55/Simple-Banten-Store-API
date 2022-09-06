@@ -14,7 +14,7 @@ class Carts{
         return this.carts;
     }
 
-    static async init(option = {}){
+    static async find(option = {}){
         const carts = await prisma.tabel_cart.findMany(option);
         return carts;
     }

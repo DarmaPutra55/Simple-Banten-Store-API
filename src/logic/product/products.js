@@ -18,7 +18,7 @@ class Products{
 
   }
 
-  static async init(){
+  static async finds(){
     const products = await prisma.tabel_barang.findMany();
     return products;
   }

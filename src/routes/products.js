@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
     try {
-        const products = new Products(await Products.init());
-        if (products.gets().length === 0) throw new Error("Tidak ada barang untuk dijual.");
-        res.status(200).send(products.gets());
+        const fetchedProducts = await Products.finds();
+        if (fetchedProducts.length === 0) throw new Error("Tidak ada barang untuk dijual.");
+        res.status(200).send(fetchedProducts);
     }
     catch (error) {
         next(error)
@@ -18,10 +18,9 @@ router.get('/', async (req, res, next) => {
 router.get('/:productId', async (req, res, next) => {
     try {
         const productId = parseInt(req.params.productId) ? parseInt(req.params.productId) : null;
-        const product = new Product(await Product.init(productId));
-
-        if (!product.get()) throw new Error("Barang tidak ditemukan!");
-        res.status(200).send(product.get());
+        const fetchedProduct = await Product.find(productId);
+        if (!fetchedProduct) throw new Error("Barang tidak ditemukan!");
+        res.status(200).send(fetchedProduct);
     }
 
     catch (error) {

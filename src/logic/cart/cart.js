@@ -4,42 +4,39 @@ const { CartItems } = require('../cartItem/cartItems');
 const prisma = new PrismaClient()
 
 class Cart{
-    constructor(cart){
-        this.set(cart);
-    }
-
-    set(cart){
-        this.cart = cart;
-    }
-
-    get(){
-        return this.cart;
+    constructor(id, id_pengguna){
+       this.id = id;
+       this.id_pengguna = id_pengguna;
     }
 
     async delete(){
         const cart = await prisma.tabel_barang.delete({
             where: {
-                id: this.cart.id
+                id: this.id
             }
         })
     
-        this.cart = {};
+        return cart ? true : false;
     }
 
     async putProduct(productId, itemQuantitiy){
-        const cartItem = await CartItem.create(this.cart.id, productId, itemQuantitiy);
+        const cartItem = await CartItem.create(this.id, productId, itemQuantitiy);
+        return cartItem ? true : false;
     }
 
     async removeProduct(cartItemId){
-        const cartItem = new CartItem(await CartItem.init(cartItemId));
+        const fetchedCartItem = await CartItem.find(cartItemId);
+        if(!fetchedCartItem) throw new Error("Barang tidak ditemukan di cart!");
+        const cartItem = new CartItem(fetchedCartItem.id, fetchedCartItem.id_cart, fetchedCartItem.id_barang, fetchedCartItem.jumlah);
         await cartItem.delete();
     }
 
     async clearCart(){
-        const cartItems = CartItems.deletes(this.cart.id);
+        const cartItems = CartItems.deletes(this.id);
+        return cartItems ? true : false;
     }
 
-    static async init(cartId){
+    static async find(cartId){
         const cart = await prisma.tabel_cart.findUnique({
             where: {
                 id: cartId

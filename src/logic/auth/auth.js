@@ -1,72 +1,68 @@
 const { PrismaClient } = require('@prisma/client');
+const { Token } = require('../token/token')
 const prisma = new PrismaClient()
-const jwt = require('jsonwebtoken')
 
-async function getUser(inputEmail, inputUsername, inputPassword) {
-    const user = await prisma.tabel_pengguna.findFirst({
-        where: {
-            OR:
-                [
-                    {
-                        email: inputEmail
-                    },
-                    {
-                        username: inputUsername
-                    }
-                ],
+class AuthManager{
+    constructor(email, username, password){
+        this.email = email;
+        this.username = username;
+        this.password = password;
+    }
 
-            password: inputPassword
-        },
-        select: {
-            id: true,
-            username: true,
-        }
-    });
-
-    return user;
-}
-
-async function register(inputEmail, inputUsername, inputPassword){
-    const user = await prisma.tabel_pengguna.create({
-        data:{
-            username: inputUsername,
-            password: inputPassword,
-            email: inputEmail,
-            id_role: 2
-        }
-    });
+    async findUser(){
+        const user = await prisma.tabel_pengguna.findFirst({
+            where: {
+                OR:
+                    [
+                        {
+                            email: this.email
+                        },
+                        {
+                            username: this.username
+                        }
+                    ],
     
+                password: this.password
+            },
+            select: {
+                id: true,
+                username: true,
+            }
+        });
+    
+        return user;
 
-    return user;
-}
+    }
 
-async function cekUser(userID) {
-    const user = await prisma.tabel_pengguna.find({
-        where:{
-            id: userID
-        }
-    })
+    async register(){
+        const user = await prisma.tabel_pengguna.create({
+            data:{
+                username: this.email,
+                password: this.password,
+                email: this.email,
+                id_role: 2
+            }
+        });
 
-    return user ? true : false
-}
+        return user;
+    }
 
-async function cekLogin(cookie){
-        const decode = cookie ? jwt.verify(cookie, 'plasma') : null;
-        if(!decode){
-            let error = new Error("Login terlebih dahulu!");
-            error.status = 400;
-            throw error;
-        }
+    login(userId){
+        const token = Token.makeToken(userId, user.username);
+        return token;
+    }
+
+    static cekUserToken(userToken){
+        const token = new Token(userToken);
+        const decode = token.decode();
         return decode;
+    }
+
+    static refreshUserToken(userToken){
+        const token = new Token(userToken);
+        const decode = token.decode();
+        return Token.makeToken(decode.id, decode.username);
+    }
 }
 
-function makeToken(id, username) {
-    return jwt.sign({
-        "id": id,
-        "username": username,
-    }, 'plasma', {
-        expiresIn: '7d'
-    });
-}
-
-module.exports = { getUser, register, cekUser, cekLogin, makeToken }
+module.exports = { AuthManager }

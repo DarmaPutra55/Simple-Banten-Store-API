@@ -2,29 +2,46 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 
 class CartItem{
-    constructor(cartItem){
-        this.set(cartItem)
+    constructor(id, id_cart, id_barang, jumlah){
+        this.id = id;
+        this.id_cart = id_cart;
+        this.id_barang = id_barang;
+        this.jumlah = jumlah;
     }
 
-    set(cartItem){
-        this.cartItem = cartItem
-    }
+    async update(id_cart, id_barang, jumlah){
+        const cartItem = await prisma.table_cart_barang.update({
+            where:{
+                id: this.id
+            },
 
-    get(){
-        return this.cartItem;
+            data: {
+                id_cart: id_cart || this.id_cart,
+                id_barang: id_barang || this.id_barang,
+                jumlah: jumlah || this.jumlah    
+            }
+        })
+
+        if(!cartItem) return false;
+
+        this.id_cart = cartItem.id_cart;
+        this.id_barang = cartItem.id_barang;
+        this.jumlah = cartItem.jumlah;
+
+        return true;
     }
 
     async delete(){
         const cartItem = await prisma.table_cart_barang.delete({
             where: {
-                id: this.cartItem.id
+                id: this.id
             }
         })
-        
-        this.cartItem = {};
+
+        return cartItem ? true : false;
     }
 
-    static async init(cartItemId){
+    static async find(cartItemId){
         const cartItem = await prisma.table_cart_barang.findUnique({
             where:{
                 id: cartItemId
@@ -34,12 +51,12 @@ class CartItem{
         return cartItem;
     }
 
-    static async create(cartId, productId, itemQuantitiy){
+    static async create(id_cart, id_barang, jumlah){
         const cartItem = prisma.table_cart_barang.create({
             data: {
-                id_cart: cartId,
-                id_barang: productId,
-                jumlah: itemQuantitiy
+                id_cart: id_cart,
+                id_barang: id_barang,
+                jumlah: jumlah
             }
         })
                     

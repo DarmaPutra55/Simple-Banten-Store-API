@@ -1,5 +1,5 @@
 const express = require('express')
-const {makeToken, getUser, verifyToken} = require('../logic/auth/auth')
+const { AuthManager } = require('../logic/auth/auth')
 const router = express.Router();
 
 router.post('/', async (req, res, next)=>{
@@ -7,14 +7,11 @@ router.post('/', async (req, res, next)=>{
         const email = req.body.email;
         const username = req.body.username;
         const password = req.body.password;
-        
-        const user = await getUser(email, username, password);
-        if(!user) {
-            let error = new Error("Pengguna tidak ditemukan.");
-            error.status = 400;
-            throw error;
-        }
-        const token = makeToken(user.id, user.username);
+        if(req.cookies.auth) throw new Error("User sudah login!");
+        const auth = new AuthManager(email, username, password);
+        const user = await auth.findUser();
+        if(!user) throw new Error("User tidak ditemukan!");
+        const token = auth.login(user.id);
         res.cookie('auth', token);
         res.status(200).json({
             ok: true
