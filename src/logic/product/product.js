@@ -3,13 +3,14 @@ const prisma = new PrismaClient()
 
 
 class Product {
-    constructor(id, nama, deskripsi, kategori, harga, stok, terjual, diskon, gambar, rating){
+    constructor(id, nama, deskripsi, kategori, harga, stok, terjual, diskon, gambar, rating, ulasan = 0){
         this.id = id;
         this.nama = nama;
         this.deskripsi = deskripsi;
         this.kategori = kategori;
         this.harga = harga;
         this.stok = stok;
+        this.ulasan = ulasan;
         this.terjual = terjual;
         this.diskon = diskon;
         this.gambar = gambar;
