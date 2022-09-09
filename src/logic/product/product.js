@@ -3,19 +3,28 @@ const prisma = new PrismaClient()
 
 
 class Product {
-    constructor(id, nama, deskripsi, id_kategori, harga, stok, terjual, diskon, gambar){
+    constructor(id, nama, deskripsi, kategori, harga, stok, terjual, diskon, gambar, rating){
         this.id = id;
         this.nama = nama;
         this.deskripsi = deskripsi;
-        this.id_kategori = id_kategori;
+        this.kategori = kategori;
         this.harga = harga;
         this.stok = stok;
         this.terjual = terjual;
         this.diskon = diskon;
         this.gambar = gambar;
+        this.rating = rating;
     }
 
-    async update(nama, deskripsi, id_kategori, harga, stok, terjual, diskon, gambar){
+    async update(nama, deskripsi, kategori, harga, stok, terjual, diskon, gambar, rating){
+        const fetchedKategori = await prisma.tabel_kategori.findFirst({
+            where: {
+                kategori: kategori || this.kategori
+            }
+        })
+
+        if(!fetchedKategori) throw new Error("Kategori tidak ditemukan!");
+
         const product = await prisma.tabel_barang.update({
             where: {
                 id: this.id
@@ -23,12 +32,14 @@ class Product {
             data: {
                 nama: nama || this.nama,
                 deskripsi: deskripsi || this.deskripsi,
-                id_kategori: id_kategori || this.id_kategori,
+                id_kategori: fetchedKategori.id,
                 harga: harga || this.harga,
                 stok: stok || this.stok,
                 terjual: terjual || this.terjual,
                 diskon: diskon || this.diskon,
-                gambar: gambar || this.gambar
+                gambar: gambar || this.gambar,
+                rate: rating.rate || this.rating.rate,
+                jumlah_rating: rating.jumlah_rating || this.rating.jumlah_rating
             }
         })
 
@@ -36,12 +47,16 @@ class Product {
 
         this.nama = product.nama;
         this.deskripsi = product.deskripsi;
-        this.id_kategori = product.id_kategori;
+        this.kategori = fetchedKategori.kategori;
         this.harga = product.harga;
         this.stok = product.stok;
         this.terjual = product.terjual;
         this.diskon = product.diskon;
         this.gambar = product.gambar;
+        this.rating = {
+            "rate": product.rate,
+            "jumlah_rating": product.jumlah_rating
+        }
 
         return true;
     }
@@ -61,22 +76,37 @@ class Product {
             where: {
               id: productId,
             },
+            include:{
+                tabel_kategori: {
+                    select: {
+                        kategori: true
+                    }
+                }
+            }
           });
         
        return product;
     }
 
-    static async create(nama, deskripsi, id_kategori, harga, stok, terjual, diskon, gambar){
+    static async create(nama, deskripsi, kategori, harga, stok, terjual, diskon, gambar){
+        const fetchedKategori = await prisma.tabel_kategori.findFirst({
+            where: {
+                kategori: kategori
+            }
+        })
+
+        if(!fetchedKategori) throw new Error("Kategori tidak ditemukan!");
+
         const product = await prisma.tabel_barang.create({
             data:{
                 nama: nama,
                 deskripsi: deskripsi,
-                id_kategori: id_kategori,
+                id_kategori: fetchedKategori.id,
                 harga: harga,
                 stok: stok,
                 terjual: terjual,
                 diskon: diskon || 0,
-                gambar: gambar
+                gambar: gambar,
             }
         })
 

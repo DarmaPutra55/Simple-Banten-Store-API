@@ -10,7 +10,7 @@ router.get('/', async (req, res, next)=>{
     try{
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = AuthManager.cekUserToken(cookie);
-        const fetchedCarts = await Carts.find();
+        const fetchedCarts = await Carts.finds();
         if(fetchedCarts.length === 0) throw new Error("Tidak ada cart!");
 
         res.status(200).send(fetchedCarts);
@@ -49,7 +49,7 @@ router.post('/:cartId', async (req, res, next) => {
         const productId = req.body.productId;
         const productQuantity = req.body.productQuantity;
         const fetchedProduct = await Product.find(productId)
-
+        if(!fetchedProduct) throw new Error("Product tidak ditemukan!");
         if(productQuantity > fetchedProduct.stok) throw new Error('Permintaan melebihi stok!')
         const cartItem = await cart.putProduct(productId, productQuantity);
         res.status(200).json({
@@ -112,7 +112,7 @@ router.delete('/:cartId/:cartItemId', async (req, res, next) => {
     }
 })
 
-router.post('/:cartId/clear', async(req, res, next)=>{
+router.delete('/:cartId/clear', async(req, res, next)=>{
     try{
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = AuthManager.cekUserToken(cookie);

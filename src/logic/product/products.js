@@ -1,32 +1,57 @@
 const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
-class Products{
-  constructor(products){
-    this.sets(products);
-  }
+class Products {
+  static async finds() {
+    const products = await prisma.tabel_barang.findMany({
+      include: {
+        tabel_kategori: {
+          select: {
+            kategori: true
+          }
+        }
+      }
+    })
 
-  sets(products){
-    this.products =  products;
-  }
-  
-  gets(){
-    return this.products;
-  }
-
-  async deletes(){
-
-  }
-
-  static async finds(){
-    const products = await prisma.tabel_barang.findMany();
     return products;
   }
 
-  static async creates(){
+  static async findsBasedOnCategoryName(categoryName) {
+    const products = await prisma.tabel_barang.findMany({
+      include: {
+        tabel_kategori: {
+          select: {
+            kategori: true
+          }
+        }
+      },
 
+      where: {
+        tabel_kategori: {
+          kategori: categoryName
+        }
+      }
+    })
+
+    return products;
   }
 
+  static async deletes(productIds) {
+    const products = await prisma.tabel_barang.deleteMany({
+      where: {
+        id: {
+          in: productIds
+        }
+      }
+    })
+
+    return products
+  }
+
+  static async clear(){
+    const products = await prisma.tabel_barang.deleteMany({})
+    return products;
+  }
 }
 
 

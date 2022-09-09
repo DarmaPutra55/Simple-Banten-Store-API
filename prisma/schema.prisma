@@ -17,6 +17,8 @@ model tabel_barang {
   terjual           Int                 @default(0)
   diskon            Float?              @db.Float
   gambar            String              @db.VarChar(250)
+  rate              Decimal             @default(0.0) @db.Decimal(5, 1)
+  jumlah_rating     Int                 @default(0)
   tabel_kategori    tabel_kategori      @relation(fields: [id_kategori], references: [id], onUpdate: Restrict, map: "FK_tabel_barang_tabel_kategori")
   tabel_ulasan      tabel_ulasan[]
   table_cart_barang table_cart_barang[]
@@ -35,16 +37,16 @@ model tabel_cart {
 
 model tabel_kategori {
   id           Int            @id @default(autoincrement())
-  kategori     String         @default("0") @db.VarChar(40)
+  kategori     String         @unique(map: "kategori") @default("0") @db.VarChar(40)
   tabel_barang tabel_barang[]
 }
 
 model tabel_pengguna {
   id           Int            @id @default(autoincrement())
-  username     String         @default("0") @db.VarChar(40)
+  username     String         @unique(map: "username") @default("0") @db.VarChar(40)
   password     String         @default("0") @db.VarChar(50)
   id_role      Int            @default(0)
-  email        String         @default("0") @db.VarChar(40)
+  email        String         @unique(map: "email") @default("0") @db.VarChar(40)
   tabel_role   tabel_role     @relation(fields: [id_role], references: [id], onUpdate: Restrict, map: "FK_tabel_pengguna_tabel_role")
   tabel_cart   tabel_cart[]
   tabel_ulasan tabel_ulasan[]

@@ -11,6 +11,7 @@ const login = require('./routes/login');
 const logout = require('./routes/logout');
 const register = require('./routes/register');
 const cart = require('./routes/cart');
+const category = require('./routes/category');
 
 app.use(helmet());
 app.use(bodyParser.json());
@@ -19,6 +20,7 @@ app.use(cors());
 app.use(morgan('combined'));
 app.use(cookieParser())
 
+app.use('/products/category', category);
 app.use('/products', products);
 app.use('/login', login);
 app.use('/logout', logout);

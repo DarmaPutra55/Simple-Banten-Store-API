@@ -48,7 +48,7 @@ class AuthManager{
     }
 
     login(userId){
-        const token = Token.makeToken(userId, user.username);
+        const token = Token.makeToken(userId, this.username);
         return token;
     }
 

@@ -32,7 +32,7 @@ class Cart{
     }
 
     async clearCart(){
-        const cartItems = CartItems.deletes(this.id);
+        const cartItems = CartItems.clear(this.id);
         return cartItems ? true : false;
     }
 
