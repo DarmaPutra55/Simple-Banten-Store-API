@@ -55,6 +55,16 @@ class Cart{
         return cart;
     }
 
+    static async DoUserHasCart(userId){
+        const cart = await prisma.tabel_cart.count({
+            where: {
+                id_pengguna: userId
+            }
+        })
+
+        return cart > 0 ? true : false;
+    }
+
     static async create(userId){
         const cart =  await prisma.tabel_cart.create({
             data: {

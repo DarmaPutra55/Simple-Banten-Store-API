@@ -37,7 +37,7 @@ class AuthManager{
     async register(){
         const user = await prisma.tabel_pengguna.create({
             data:{
-                username: this.email,
+                username: this.username,
                 password: this.password,
                 email: this.email,
                 id_role: 2
