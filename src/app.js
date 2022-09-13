@@ -16,7 +16,10 @@ const category = require('./routes/category');
 app.use(helmet());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(cors());
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
 app.use(morgan('combined'));
 app.use(cookieParser())
 

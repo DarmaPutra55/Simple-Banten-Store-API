@@ -55,14 +55,14 @@ class Cart{
         return cart;
     }
 
-    static async DoUserHasCart(userId){
-        const cart = await prisma.tabel_cart.count({
+    static async findCartBasedOnUserId(userId){
+        const cart = await prisma.tabel_cart.findFirst({
             where: {
                 id_pengguna: userId
             }
         })
 
-        return cart > 0 ? true : false;
+        return cart;
     }
 
     static async create(userId){

@@ -14,7 +14,7 @@ router.post('/', async (req, res, next)=>{
         if(await auth.findUser()) throw new Error('User sudah teregistrasi!');
         const user = await auth.register();
         const cart = await Cart.create(user.id);
-        const token = auth.login(user.id);
+        const token = auth.login(user.id, cart.id);
         res.cookie('auth', token);
         res.status(200).json({
             ok: true

@@ -12,9 +12,9 @@ router.post('/', async (req, res, next)=>{
         const auth = new AuthManager(email, username, password);
         const user = await auth.findUser();
         if(!user) throw new Error("User tidak ditemukan!");
-        const cart = await Cart.DoUserHasCart(user.id);
+        const cart = await Cart.findCartBasedOnUserId(user.id);
         if(!cart) await Cart.create(user.id);
-        const token = auth.login(user.id);
+        const token = auth.login(user.id, cart.id);
         res.cookie('auth', token);
         res.status(200).json({
             ok: true
@@ -22,6 +22,19 @@ router.post('/', async (req, res, next)=>{
     }
     catch(error){
         next(error);
+    }
+})
+
+router.get('/', (req, res, next)=>{
+    try{
+        const token = req.cookies ? req.cookies.auth : null;
+        const decodeToken = AuthManager.cekUserToken(token);
+        res.status(200).json(decodeToken);
+    }
+    catch(err){
+        res.status(400).json({
+            ok: false
+        })
     }
 })
 

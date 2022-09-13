@@ -47,8 +47,8 @@ class AuthManager{
         return user;
     }
 
-    login(userId){
-        const token = Token.makeToken(userId, this.username);
+    login(userId, cartId){
+        const token = Token.makeToken(userId, this.username, cartId);
         return token;
     }
 
@@ -61,7 +61,7 @@ class AuthManager{
     static refreshUserToken(userToken){
         const token = new Token(userToken);
         const decode = token.decode();
-        return Token.makeToken(decode.id, decode.username);
+        return Token.makeToken(decode.id, decode.username, decode.cartId);
     }
 }
 

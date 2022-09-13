@@ -9,10 +9,11 @@ class Token{
         return jwt.verify(this.token, 'plasma');
     }
     
-    static makeToken(id, username) {
+    static makeToken(id, username, cartId) {
         return jwt.sign({
             "id": id,
             "username": username,
+            "cartId": cartId
         }, 'plasma', {
             expiresIn: '7d'
         });

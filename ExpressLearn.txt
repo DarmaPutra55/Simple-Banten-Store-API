@@ -1,3 +1,11 @@
 +Ignore suggested change that ask to turn 'require' into ES expression.
 +When finding table record with 'WHERE' more than one, use findFirst for single record and findMany for many record instead of findUnique
 +When creating new record in table, make sure the foreign key match with the one in database.
+
++Express will not accept request from diffrent server (For example, if you had express on port 3000 and react on port 3001, it count as diffrent domain). You can set the cors() middleware to accept any origin by giving it option {origin = true}
+
+Example:
+app.use(cors({
+    origin: true, //Allow from any origins
+    credentials: true //Will accept cookies
+}));
