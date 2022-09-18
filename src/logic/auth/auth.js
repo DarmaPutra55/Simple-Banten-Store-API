@@ -27,6 +27,7 @@ class AuthManager{
             select: {
                 id: true,
                 username: true,
+                id_role: true,
             }
         });
     
@@ -47,8 +48,8 @@ class AuthManager{
         return user;
     }
 
-    login(userId, cartId){
-        const token = Token.makeToken(userId, this.username, cartId);
+    login(userId, id_role, cartId){
+        const token = Token.makeToken(userId, this.username, id_role, cartId);
         return token;
     }
 

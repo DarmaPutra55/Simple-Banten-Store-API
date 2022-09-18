@@ -14,7 +14,7 @@ router.post('/', async (req, res, next)=>{
         if(!user) throw new Error("User tidak ditemukan!");
         const cart = await Cart.findCartBasedOnUserId(user.id);
         if(!cart) await Cart.create(user.id);
-        const token = auth.login(user.id, cart.id);
+        const token = auth.login(user.id, user.id_role, cart.id);
         res.cookie('auth', token);
         res.status(200).json({
             ok: true
