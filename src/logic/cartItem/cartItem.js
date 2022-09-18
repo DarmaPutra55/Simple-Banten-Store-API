@@ -2,14 +2,15 @@ const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient()
 
 class CartItem{
-    constructor(id, id_cart, id_barang, jumlah){
+    constructor(id, id_cart, id_barang, jumlah, checked){
         this.id = id;
         this.id_cart = id_cart;
         this.id_barang = id_barang;
         this.jumlah = jumlah;
+        this.checked = checked;
     }
 
-    async update(id_cart, id_barang, jumlah){
+    async update(id_cart, id_barang, jumlah, checked){
         const cartItem = await prisma.table_cart_barang.update({
             where:{
                 id: this.id
@@ -18,7 +19,8 @@ class CartItem{
             data: {
                 id_cart: id_cart || this.id_cart,
                 id_barang: id_barang || this.id_barang,
-                jumlah: jumlah || this.jumlah    
+                jumlah: jumlah || this.jumlah,
+                checked: checked || this.checked
             }
         })
 
@@ -27,6 +29,7 @@ class CartItem{
         this.id_cart = cartItem.id_cart;
         this.id_barang = cartItem.id_barang;
         this.jumlah = cartItem.jumlah;
+        this.checked = cartItem.checked;
 
         return true;
     }

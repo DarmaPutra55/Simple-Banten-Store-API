@@ -79,6 +79,7 @@ model table_cart_barang {
   id_cart      Int          @default(0)
   id_barang    Int          @default(0)
   jumlah       Int          @default(0)
+  checked      Boolean      @default(true)
   tabel_barang tabel_barang @relation(fields: [id_barang], references: [id], onUpdate: Restrict, map: "FK_table_cart_barang_tabel_barang")
   tabel_cart   tabel_cart   @relation(fields: [id_cart], references: [id], onUpdate: Restrict, map: "FK_table_cart_barang_tabel_cart")
 
