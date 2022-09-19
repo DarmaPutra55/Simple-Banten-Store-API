@@ -5,11 +5,10 @@ const router = express.Router();
 
 router.post('/', async (req, res, next)=>{
     try{
-        const email = req.body.email;
         const username = req.body.username;
         const password = req.body.password;
         if(req.cookies.auth) throw new Error("User sudah login!");
-        const auth = new AuthManager(email, username, password);
+        const auth = new AuthManager(username, password);
         const user = await auth.findUser();
         if(!user) throw new Error("User tidak ditemukan!");
         const cart = await Cart.findCartBasedOnUserId(user.id);

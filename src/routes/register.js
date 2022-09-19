@@ -10,7 +10,7 @@ router.post('/', async (req, res, next)=>{
         const username = req.body.username;
         const password = req.body.password;
 
-        const auth = new AuthManager(email, username, password);
+        const auth = new AuthManager(username, password, email);
         if(await auth.findUser()) throw new Error('User sudah teregistrasi!');
         const user = await auth.register();
         const cart = await Cart.create(user.id);
