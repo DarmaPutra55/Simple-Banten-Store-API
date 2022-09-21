@@ -4,6 +4,7 @@ const { AuthManager } = require('../logic/auth/auth')
 const { Cart } = require('../logic/cart/cart')
 const { Carts } = require('../logic/cart/carts')
 const { Product } = require('../logic/product/product')
+const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
 router.get('/', async (req, res, next)=>{
@@ -36,8 +37,15 @@ router.get('/:cartId', async (req, res, next)=>{
     }
 })
 
-router.post('/:cartId', async (req, res, next) => {
+router.post('/:cartId',
+    body('productId').isInt(),
+    body('productQuantity').isInt().isLength({max: 3}),
+async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
         const cookie = req.cookies ? req.cookies.auth : null;
         const jwtValue = AuthManager.cekUserToken(cookie);
         const cartId = parseInt(req.params.cartId) ? parseInt(req.params.cartId) : null;
