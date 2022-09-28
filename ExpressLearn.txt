@@ -9,3 +9,53 @@ app.use(cors({
     origin: true, //Allow from any origins
     credentials: true //Will accept cookies
 }));
+
++Remember, Express run from TOP to DOWN.
+
++Use patch instead of update.
+
++It preferable to return newly updated/created data instead of {status: ok}
+
++It preferable to group all route that need to preform similar validation and then use middleware to validate instead of repeating it over and over again.
+Example:
+
+router.use((req, res, next) => { //Middleware to check if user is logged in, if a route has no need to do this, place that route above this middleware.
+    try {
+        const cookie = req.cookies ? req.cookies.auth : null;
+        const jwtValue = AuthManager.cekUserToken(cookie);
+        req.jwtValue = jwtValue; //Asign jwtValue to request;
+        next(); //Remember to add next() so express will run the code below this.
+    }
+    catch (error) {
+        next(error);
+    }
+})
+
+router.get('/all', async (req, res, next) => { //Find all cart
+    try {
+        const fetchedCarts = await Carts.finds();
+        if (fetchedCarts.length === 0) throw new Error("Tidak ada cart!");
+
+        res.status(200).send(fetchedCarts);
+    }
+    catch (error) {
+        next(error);
+    }
+})
+
+
+router.use(async (req, res, next) => { //Middleware to check if cart exist or not. Turned into middleware because all route except '/all' require it in the cart.
+    try {
+        const fetchedCart = await Cart.find(req.jwtValue.cartId);
+        if (!fetchedCart) throw new Error('Cart tidak ditemukan!');
+        req.cart = fetchedCart;
+        next();
+    }
+    catch (error) {
+        next(error)
+    }
+})
+
+router.get('/', async (req, res) => {
+    res.status(200).send(req.cart);
+})

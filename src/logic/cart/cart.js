@@ -24,6 +24,14 @@ class Cart{
         return cartItem ? true : false;
     }
 
+    async updateCartItem(id, id_cart, id_barang, jumlah, checked){
+        const fetchedCartItem = await CartItem.find(id);
+        if(!fetchedCartItem) throw new Error("Barang tidak ditemukan di cart!");
+        const cartItem = new CartItem(fetchedCartItem.id, fetchedCartItem.id_cart, fetchedCartItem.id_barang, fetchedCartItem.jumlah, fetchedCartItem.checked);
+        await cartItem.update(id_cart, id_barang, jumlah, checked);
+        return cartItem;
+    }
+
     async removeProduct(cartItemId){
         const fetchedCartItem = await CartItem.find(cartItemId);
         if(!fetchedCartItem) throw new Error("Barang tidak ditemukan di cart!");

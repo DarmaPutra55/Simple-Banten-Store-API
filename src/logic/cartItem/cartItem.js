@@ -17,10 +17,10 @@ class CartItem{
             },
 
             data: {
-                id_cart: id_cart || this.id_cart,
-                id_barang: id_barang || this.id_barang,
-                jumlah: jumlah || this.jumlah,
-                checked: checked || this.checked
+                id_cart: id_cart,
+                id_barang: id_barang,
+                jumlah: jumlah,
+                checked: checked
             }
         })
 
