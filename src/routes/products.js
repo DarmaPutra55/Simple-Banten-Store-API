@@ -7,11 +7,24 @@ const router = express.Router();
 
 router.get('/', async (req, res, next) => {
     try {
-        const fetchedProducts = await Products.finds();
+        let searchParams = {};
+        let paginationParams = {};
+        if (req.query.nama) searchParams.nama = {
+            contains: req.query.nama,
+        };
+
+        if (req.query.kategori) searchParams.tabel_kategori = {
+            kategori: req.query.kategori,
+        };
+
+        if (parseInt(req.query.skip)) paginationParams.skip = parseInt(req.query.skip);
+        if (parseInt(req.query.limit)) paginationParams.take = parseInt(req.query.limit);
+
+        const fetchedProducts = await Products.finds(searchParams, paginationParams);
         if (fetchedProducts.length === 0) throw new Error("Tidak ada barang untuk dijual.");
-        const products = await Promise.all(fetchedProducts.map(async (fetchedProduct)=>{
+        const products = await Promise.all(fetchedProducts.map(async (fetchedProduct) => {
             const ulasan = await Discussions.countDiscussionBasedOnProductId(fetchedProduct.id);
-            const product = new Product(fetchedProduct.id, fetchedProduct.nama, fetchedProduct.deskripsi, fetchedProduct.tabel_kategori.kategori, fetchedProduct.harga, fetchedProduct.stok, fetchedProduct.terjual, fetchedProduct.diskon, fetchedProduct.gambar, {"rate": parseFloat(fetchedProduct.rate), "jumlah_rating": fetchedProduct.jumlah_rating}, ulasan);
+            const product = new Product(fetchedProduct.id, fetchedProduct.nama, fetchedProduct.deskripsi, fetchedProduct.tabel_kategori.kategori, fetchedProduct.harga, fetchedProduct.stok, fetchedProduct.terjual, fetchedProduct.diskon, fetchedProduct.gambar, { "rate": parseFloat(fetchedProduct.rate), "jumlah_rating": fetchedProduct.jumlah_rating }, ulasan);
             return product;
         }))
         res.status(200).send(products);
@@ -28,7 +41,7 @@ router.get('/:productId', async (req, res, next) => {
         const fetchedProduct = await Product.find(productId);
         if (!fetchedProduct) throw new Error("Barang tidak ditemukan!");
         const ulasan = await Discussions.countDiscussionBasedOnProductId(fetchedProduct.id);
-        const product = new Product(fetchedProduct.id, fetchedProduct.nama, fetchedProduct.deskripsi, fetchedProduct.tabel_kategori.kategori, fetchedProduct.harga, fetchedProduct.stok, fetchedProduct.terjual, fetchedProduct.diskon, fetchedProduct.gambar, {"rate": parseFloat(fetchedProduct.rate), "jumlah_rating": fetchedProduct.jumlah_rating}, ulasan)
+        const product = new Product(fetchedProduct.id, fetchedProduct.nama, fetchedProduct.deskripsi, fetchedProduct.tabel_kategori.kategori, fetchedProduct.harga, fetchedProduct.stok, fetchedProduct.terjual, fetchedProduct.diskon, fetchedProduct.gambar, { "rate": parseFloat(fetchedProduct.rate), "jumlah_rating": fetchedProduct.jumlah_rating }, ulasan)
         res.status(200).send(product);
     }
 

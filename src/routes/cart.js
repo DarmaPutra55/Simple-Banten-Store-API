@@ -49,8 +49,8 @@ router.get('/', async (req, res) => {
 })
 
 router.post('/',
-    body('productId').isInt({ min: 0 }),
-    body('productQuantity').isInt({ min: 0, max: 100 }).isLength({ max: 3 }),
+    body('id_barang').isInt({ min: 0 }),
+    body('jumlah').isInt({ min: 0, max: 100 }).isLength({ max: 3 }),
     async (req, res, next) => {
         try {
             const errors = validationResult(req);
@@ -59,12 +59,12 @@ router.post('/',
             }
 
             const cart = new Cart(req.cart.id, req.cart.id_pengguna);
-            const productId = req.body.productId;
-            const productQuantity = req.body.productQuantity;
-            const fetchedProduct = await Product.find(productId)
+            const id_barang = req.body.id_barang;
+            const jumlah = req.body.jumlah;
+            const fetchedProduct = await Product.find(id_barang)
             if (!fetchedProduct) throw new Error("Product tidak ditemukan!");
-            if (productQuantity > fetchedProduct.stok) throw new Error('Permintaan melebihi stok!')
-            const cartItem = await cart.putProduct(productId, productQuantity);
+            if (jumlah > fetchedProduct.stok) throw new Error('Permintaan melebihi stok!');
+            const cartItem = await cart.putProduct(id_barang, jumlah);
             res.status(200).json({
                 ok: true
             });

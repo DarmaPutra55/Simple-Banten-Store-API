@@ -2,15 +2,17 @@ const { PrismaClient } = require('@prisma/client')
 const prisma = new PrismaClient()
 
 class Products {
-  static async finds() {
+  static async finds(searchParams, paginationParams) {
     const products = await prisma.tabel_barang.findMany({
+      ...paginationParams,
       include: {
         tabel_kategori: {
           select: {
             kategori: true
           }
         }
-      }
+      },
+      where: searchParams,
     })
 
     return products;

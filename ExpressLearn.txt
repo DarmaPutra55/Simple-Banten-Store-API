@@ -59,3 +59,13 @@ router.use(async (req, res, next) => { //Middleware to check if cart exist or no
 router.get('/', async (req, res) => {
     res.status(200).send(req.cart);
 })
+
++To access query from url, use req.query.<queryKey>.
+
+Example:
+localhost:3001/products?kategori=tas //This is the url.
+
+ExpressJS:
+router.get('/products/', async (req, res) => {
+    console.log(req.query.kategori) //You don't need to make another route.
+})
