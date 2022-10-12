@@ -1,6 +1,5 @@
-const { PrismaClient } = require('@prisma/client');
 const { Token } = require('../token/token')
-const prisma = new PrismaClient()
+const { User } = require('../user/user')
 
 class AuthManager {
     constructor(username, password, email = null) {
@@ -9,41 +8,8 @@ class AuthManager {
         this.password = password;
     }
 
-    async findUser() {
-        const user = await prisma.tabel_pengguna.findFirst({
-            where: {
-                AND: [
-                    {
-                        username: this.username
-                    },
-                    {
-                        password: this.password
-                    }
-                ]
-
-
-            },
-            select: {
-                id: true,
-                username: true,
-                id_role: true,
-            }
-        });
-
-        return user;
-
-    }
-
     async register() {
-        const user = await prisma.tabel_pengguna.create({
-            data: {
-                username: this.username,
-                password: this.password,
-                email: this.email,
-                id_role: 2
-            }
-        });
-
+        const user = await User.createUser(this.username, this.password, this.email, 2);
         return user;
     }
 

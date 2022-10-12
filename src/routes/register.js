@@ -1,6 +1,7 @@
 const { Prisma } = require('@prisma/client');
 const express = require('express');
 const { Cart } = require('../logic/cart/cart');
+const { User } = require('../logic/user/user')
 const { AuthManager } = require('../logic/auth/auth');
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
@@ -21,7 +22,7 @@ router.post('/',
             const password = req.body.password;
 
             const auth = new AuthManager(username, password, email);
-            if (await auth.findUser()) throw new Error('User sudah teregistrasi!');
+            if (await User.findUser(auth.username, auth.password)) throw new Error('User sudah teregistrasi!');
             const user = await auth.register();
             const cart = await Cart.create(user.id);
             const token = auth.login(user.id, user.id_role, cart.id);

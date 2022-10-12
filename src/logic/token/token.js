@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken')
+const key = process.env.SECRET_KEY;
 
 class Token{
     constructor(token){
@@ -6,7 +7,7 @@ class Token{
     }
     
     decode(){
-        return jwt.verify(this.token, 'plasma');
+        return jwt.verify(this.token, key);
     }
     
     static makeToken(id, username, id_role, cartId) {
@@ -15,7 +16,7 @@ class Token{
             "username": username,
             "id_role": id_role,
             "cartId": cartId
-        }, 'plasma', {
+        }, key, {
             expiresIn: '7d'
         });
     }

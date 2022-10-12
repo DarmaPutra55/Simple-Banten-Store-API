@@ -47,6 +47,7 @@ model tabel_pengguna {
   password     String         @default("0") @db.VarChar(50)
   id_role      Int            @default(0)
   email        String         @unique(map: "email") @default("0") @db.VarChar(40)
+  profile_img  String?        @db.VarChar(50)
   tabel_role   tabel_role     @relation(fields: [id_role], references: [id], onUpdate: Restrict, map: "FK_tabel_pengguna_tabel_role")
   tabel_cart   tabel_cart[]
   tabel_ulasan tabel_ulasan[]

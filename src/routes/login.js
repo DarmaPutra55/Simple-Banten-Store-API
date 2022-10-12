@@ -1,6 +1,7 @@
 const express = require('express')
 const { Cart } = require('../logic/cart/cart')
 const { AuthManager } = require('../logic/auth/auth')
+const { User } = require('../logic/user/user')
 const { body, validationResult } = require('express-validator');
 const router = express.Router();
 
@@ -17,7 +18,7 @@ router.post('/',
             const password = req.body.password;
             if (req.cookies.auth) throw new Error("User sudah login!");
             const auth = new AuthManager(username, password);
-            const user = await auth.findUser();
+            const user = await User.findUser(auth.username, auth.password);
             if (!user) throw new Error("User tidak ditemukan!");
             const cart = await Cart.findCartBasedOnUserId(user.id);
             if (!cart) await Cart.create(user.id);
